@@ -1,0 +1,76 @@
+⦁	Application : Ecommerce 
+#include <stdio.h>
+
+// Structure for items
+struct Item {
+    float price;
+    float discount;
+    float ratio; // discount/price ratio
+};
+
+// Function to swap items
+void swap(struct Item *a, struct Item *b) {
+    struct Item temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Greedy method for fractional knapsack
+void fractionalKnapsack(struct Item items[], int n, float budget) {
+    // Sort items by ratio (discount/price) in descending order
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (items[i].ratio < items[j].ratio) {
+                swap(&items[i], &items[j]);
+            }
+        }
+    }
+
+    float totalDiscount = 0.0, totalSpent = 0.0;
+
+    printf("\nSelected items (price, discount):\n");
+
+    for (int i = 0; i < n; i++) {
+        if (totalSpent + items[i].price <= budget) {
+            // Take full item
+            totalSpent += items[i].price;
+            totalDiscount += items[i].discount;
+            printf("Full Item: Price = %.2f, Discount = %.2f\n", items[i].price, items[i].discount);
+        } else {
+            // Take fractional part
+            float remain = budget - totalSpent;
+            float fraction = remain / items[i].price;
+            totalDiscount += items[i].discount * fraction;
+            totalSpent += items[i].price * fraction;
+            printf("Fractional Item: Price = %.2f, Discount = %.2f (%.2f%% taken)\n",
+                   items[i].price, items[i].discount, fraction * 100);
+            break;
+        }
+    }
+
+    printf("\nTotal budget spent: %.2f", totalSpent);
+    printf("\nMaximum total discount value: %.2f\n", totalDiscount);
+}
+
+int main() {
+    int n;
+    float budget;
+
+    printf("Enter number of products: ");
+    scanf("%d", &n);
+
+    struct Item items[n];
+
+    for (int i = 0; i < n; i++) {
+        printf("\nEnter price and discount of product %d: ", i + 1);
+        scanf("%f %f", &items[i].price, &items[i].discount);
+        items[i].ratio = items[i].discount / items[i].price;
+    }
+
+    printf("\nEnter total budget available: ");
+    scanf("%f", &budget);
+
+    fractionalKnapsack(items, n, budget);
+
+    return 0;
+}
